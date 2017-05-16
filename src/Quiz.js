@@ -12,12 +12,18 @@ class Quiz extends Component {
         this.state = {
             riddle,
             correct,
-            gameOver
+            gameOver,
+            time: 5,
+            point: 0
         }
 
         this.renderOptions = this.renderOptions.bind(this);
         this.checkResults = this.checkResults.bind(this);
         this.playAgain = this.playAgain.bind(this);
+    }
+
+    componentDidMount() {
+        this.checkTime();
     }
 
     randomNumber(min, max) {
@@ -68,10 +74,10 @@ class Quiz extends Component {
         // console.log(option);
         if (this.state.riddle.ansewr === option) {
             // console.log('correct');
-            this.setState({ correct: true, gameOver: true });
+            this.setState({ correct: true, gameOver: true, point: this.state.point + 1 });
         } else {
             // console.log('game over');
-            this.setState({ correct: false, gameOver: true });
+            this.setState({ correct: false, gameOver: true, time: 0 });
         }
     }
     renderOptions() {
@@ -86,20 +92,32 @@ class Quiz extends Component {
 
     renderMessages() {
         if (this.state.correct) {
-            return (
-                <h3>Good Job !</h3>
-            );
+            // return (
+            //     <h3>Good Job !</h3>
+            // );
+            this.setState({ correct: false, gameOver: false, time: 5 });
+            this.playGame();
         } else {
             return (
                 <h3>Hit the button below to Play Again</h3>
             );
         }
-
     }
 
     playAgain() {
-        this.setState({ correct: false, gameOver: false });
+        this.setState({ correct: false, gameOver: false, time: 5, point: 0 });
         this.playGame();
+    }
+
+    checkTime() {
+        setInterval(() => {
+            if (this.state.time > 0) {
+                let time = this.state.time - 1;
+                this.setState({ time });
+            } else {
+                this.setState({ correct: false, gameOver: true });
+            }
+        }, 1000);
     }
 
     render() {
@@ -115,9 +133,12 @@ class Quiz extends Component {
                 <div className={classNames('after', { 'hide': !this.state.gameOver }, { 'wrong animated zoomInDown': !this.state.correct }, { 'correct animated zoomInDown': this.state.correct })} >
                     {this.renderMessages()}
                 </div>
+
                 <div className="play">
                     <a className="button" onClick={this.playAgain}>Play Again</a>
                 </div>
+                <div className="checkTime">Time: {this.state.time}</div>
+                <div className="point">Point: {this.state.point}</div>
             </div>
         );
     }
